@@ -1,5 +1,6 @@
 use lindera::tokenizer::{Token, Tokenizer};
 use std::{
+    collections::HashMap,
     env,
     fs::File,
     io::{BufRead, BufReader},
@@ -24,12 +25,18 @@ fn test_tokenize() {
 }
 
 fn main() {
+    let mut word_counter = HashMap::new();
     let args = env::args().collect::<Vec<String>>();
     let file_path = &args[1];
     let file = File::open(file_path).unwrap();
     let reader = BufReader::new(file);
     for line in reader.lines() {
         let line = line.unwrap();
-        let _tokens = tokenize(&line);
+        let tokens = tokenize(&line);
+        for token in &tokens {
+            let word = token.text;
+            let count = word_counter.entry(word).or_insert(0);
+            *count += 1;
+        }
     }
 }
