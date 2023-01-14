@@ -1,3 +1,7 @@
 /target
 raw_data/
 output/
+
+# For scripts
+.venv/
+.DS_Store

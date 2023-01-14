@@ -46,7 +46,7 @@ fn main() {
     let reader = BufReader::new(file);
     let lines = reader.lines();
     for line in lines {
-        let line = line.unwrap().clone();
+        let line = line.unwrap();
         let tokens = tokenize(&line);
         for token in &tokens {
             let word = token.text;
