@@ -1,7 +1,9 @@
 import json
+import sys
 
-file_path = 'output/result1.json'
-sorted_file_path = 'output/sorted_result.json'
+args = sys.argv
+file_path = args[1]
+sorted_file_path = args[2]
 with open(file_path, 'r') as f:
     data = json.load(f)
     sorted_data_list = sorted(data.items(), key=lambda x: x[1], reverse=True)
