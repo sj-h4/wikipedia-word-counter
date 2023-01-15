@@ -17,7 +17,7 @@ fn get_tokenizer() -> Tokenizer {
         dictionary,
         user_dictionary: None,
         mode: Mode::Normal,
-        with_details:false,
+        with_details:true,
     };
     return Tokenizer::from_config(config).unwrap();
 }
@@ -31,12 +31,12 @@ fn tokenize<'a>(tokenizer: &'a mut Tokenizer, target_text: &'a str) -> Vec<Token
 #[test]
 fn test_tokenize() {
     let mut tokenizer = get_tokenizer();
-    let target_text = "今日は晴れだ。".to_string();
+    let target_text = "コップを使って水を飲む。".to_string();
     let tokens = tokenize(&mut tokenizer, &target_text);
     for token in &tokens {
-        println!("{:?}", token.text);
+        println!("{:?}", token.details);
     }
-    assert_eq!(tokens.len(), 5);
+    assert_eq!(tokens.len(), 8);
 }
 
 #[test]
@@ -46,7 +46,8 @@ fn test_word_count() {
     let target_text = "今日は晴れだ。今日は雨が降らない。明日も晴れだ。".to_string();
     let tokens = tokenize(&mut tokenizer, &target_text);
     for token in &tokens {
-        let entry= token.text.to_string();
+        let details = token.details.as_ref().unwrap();
+        let entry = details[6].to_string();
         word_counter.entry(entry).and_modify(|counter| *counter += 1).or_insert(1);
     }
     assert_eq!(word_counter.get("今日").unwrap(), &2);
@@ -61,11 +62,22 @@ fn write_result(word_counter: &HashMap<String, i32>, result_path: &String) -> st
 }
 
 fn count_word(tokenizer: &mut Tokenizer, text: &str) -> HashMap<String, i32> {
+    let ignore_words = ["。", "、", "「", "」", "『", "』", "（", "）", "・", "！", "？", "…", "　", " ", "!", "?"];
     let tokens = tokenize(tokenizer, text);
     let mut word_counter = HashMap::new();
     for token in &tokens {
-        let entry = token.text.to_string();
-        word_counter.entry(entry).and_modify(|counter| *counter += 1).or_insert(1);
+        let entry: &str;
+        let detials = token.details.as_ref().unwrap();
+        match detials.get(6) {
+            Some(v) => {
+                entry = v;
+            }
+            None => continue,
+        }
+        if ignore_words.contains(&entry) {
+            continue;
+        }
+        word_counter.entry(entry.to_string()).and_modify(|counter| *counter += 1).or_insert(1);
     }
     return word_counter;
 }
